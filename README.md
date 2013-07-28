@@ -27,6 +27,8 @@ The `/var/www` folder in the box is synced with `~/Sites`. You can edit the `Vag
 
 SSH into the box with `vagrant ssh` to run whatever is needed.
 
+MySQL root password setup as `root` to keep it simple.
+
 The box is setup with IP `192.168.56.101`. Point your browser there or setup your host file to point to `local.whatup`, which is configured as a vhost here.
 
 
