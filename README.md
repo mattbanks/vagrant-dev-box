@@ -1,6 +1,6 @@
 # Vagrant PHP/WordPress Development Box
 
-Created with [PuPHPet](https://puphpet.com/). Sets up a nice LAMP development box for PHP/WordPress, with Composer, NodeJS, Grunt, Yeoman, and Bower.
+Created with [PuPHPet](https://puphpet.com/) and tweaked to add extra features and packages. Sets up a nice LAMP development box for PHP/WordPress, with Composer, NodeJS, Grunt, Yeoman, and Bower.
 
 ## Includes:
 
