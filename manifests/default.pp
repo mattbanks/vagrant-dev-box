@@ -163,16 +163,6 @@ class { 'mysql::server':
   config_hash   => { 'root_password' => 'mattbanks14' }
 }
 
-mysql::db { 'mattbanks_test_db':
-  grant    => [
-    'ALL'
-  ],
-  user     => 'mattbanks',
-  password => 'mattbanks',
-  host     => 'localhost',
-  charset  => 'utf8',
-  require  => Class['mysql::server'],
-}
 
 class { 'phpmyadmin':
   require => [Class['mysql::server'], Class['mysql::config'], Class['php']],
