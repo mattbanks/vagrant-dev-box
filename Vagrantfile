@@ -7,16 +7,17 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider :virtualbox do |v|
     v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-    v.customize ["modifyvm", :id, "--memory", 512]
-    v.customize ["modifyvm", :id, "--name", "my-dev-box"]
+    v.customize ["modifyvm", :id, "--memory", 1024]
+    v.customize ["modifyvm", :id, "--name", "matts-dev-box"]
   end
 
 
   config.vm.synced_folder "~/Sites", "/var/www", id: "vagrant-root"
-  config.vm.provision :shell, :inline => "sudo apt-get update"
+  config.vm.provision :shell, :inline =>
+    "if [[ ! -f /apt-get-run ]]; then sudo apt-get update && sudo touch /apt-get-run; fi"
 
 
-  config.vm.provision :shell, :inline => 'echo -e "mysql_root_password=root
+  config.vm.provision :shell, :inline => 'echo -e "mysql_root_password=mattbanks14
 controluser_password=awesome" > /etc/phpmyadmin.facts;'
 
   config.vm.provision :puppet do |puppet|
