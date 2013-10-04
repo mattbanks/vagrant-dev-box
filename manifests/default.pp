@@ -13,14 +13,11 @@ and title != 'software-properties-common'
 
     apt::key { '4F4EA0AAE5267A6C': }
 
-apt::ppa { 'ppa:ondrej/php5':
+apt::ppa { 'ppa:ondrej/php5-oldstable':
   require => Apt::Key['4F4EA0AAE5267A6C']
 }
 
-file { '/home/vagrant/.bash_aliases':
-  ensure => 'present',
-  source => 'puppet:///modules/puphpet/dot/.bash_aliases',
-}
+class { 'puphpet::dotfiles': }
 
 package { [
     'build-essential',
@@ -62,8 +59,6 @@ php::module { 'php5-curl': }
 php::module { 'php5-gd': }
 php::module { 'php5-intl': }
 php::module { 'php5-mcrypt': }
-php::module { 'php5-pgsql': }
-php::module { 'php5-sqlite': }
 php::module { 'php-apc': }
 
 class { 'php::devel':
@@ -76,17 +71,49 @@ class { 'php::pear':
 
 
 
+$xhprofPath = '/var/www/xhprof'
+
 php::pecl::module { 'xhprof':
   use_package     => false,
   preferred_state => 'beta',
 }
 
+if !defined(Package['git-core']) {
+  package { 'git-core' : }
+}
+
+vcsrepo { $xhprofPath:
+  ensure   => present,
+  provider => git,
+  source   => 'https://github.com/facebook/xhprof.git',
+  require  => Package['git-core']
+}
+
+file { "${xhprofPath}/xhprof_html":
+  ensure  => 'directory',
+  owner   => 'vagrant',
+  group   => 'vagrant',
+  mode    => '0775',
+  require => Vcsrepo[$xhprofPath]
+}
+
+composer::run { 'xhprof-composer-run':
+  path    => $xhprofPath,
+  require => [
+    Class['composer'],
+    File["${xhprofPath}/xhprof_html"]
+  ]
+}
+
 apache::vhost { 'xhprof':
   server_name => 'xhprof',
-  docroot     => '/var/www/xhprof/xhprof_html',
+  docroot     => "${xhprofPath}/xhprof_html",
   port        => 80,
   priority    => '1',
-  require     => Php::Pecl::Module['xhprof']
+  require     => [
+    Php::Pecl::Module['xhprof'],
+    File["${xhprofPath}/xhprof_html"]
+  ]
 }
 
 
@@ -133,9 +160,19 @@ puphpet::ini { 'custom':
 
 
 class { 'mysql::server':
-  config_hash   => { 'root_password' => 'root' }
+  config_hash   => { 'root_password' => 'mattbanks14' }
 }
 
+mysql::db { 'mattbanks_test_db':
+  grant    => [
+    'ALL'
+  ],
+  user     => 'mattbanks',
+  password => 'mattbanks',
+  host     => 'localhost',
+  charset  => 'utf8',
+  require  => Class['mysql::server'],
+}
 
 class { 'phpmyadmin':
   require => [Class['mysql::server'], Class['mysql::config'], Class['php']],

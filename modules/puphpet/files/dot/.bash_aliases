@@ -3,8 +3,8 @@ if [ -f /etc/bash_completion ]; then
 fi
 
 __has_parent_dir () {
-    # Utility function so we can test for things like .git/.hg without firing up a
-    # separate process
+    # Utility function so we can test for things like .git/.hg without firing
+    # up a separate process
     test -d "$1" && return 0;
 
     current="."
@@ -39,7 +39,6 @@ lt_blue=$(tput -Txterm setaf 6)
 bold=$(tput -Txterm bold)
 reset=$(tput -Txterm sgr0)
 
-# Nicely formatted terminal prompt
 export PS1='\n\[$bold\]\[$black\][\[$dk_blue\]\@\[$black\]]-[\[$green\]\u\[$yellow\]@\[$green\]\h\[$black\]]-[\[$pink\]\w\[$black\]]\[\033[0;33m\]$(__vcs_name) \[\033[00m\]\[$reset\]\n\[$reset\]\$ '
 
 alias ls='ls -F --color=always'
