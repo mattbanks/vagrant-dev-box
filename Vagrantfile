@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
   end
 
 
-  config.vm.synced_folder "~/Sites", "/var/www", id: "vagrant-root"
+  config.vm.synced_folder "~/Sites", "/var/www", id: "vagrant-root", :nfs => true
   config.vm.provision :shell, :inline =>
     "if [[ ! -f /apt-get-run ]]; then sudo apt-get update && sudo touch /apt-get-run; fi"
 
