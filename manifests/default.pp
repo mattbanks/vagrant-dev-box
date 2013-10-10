@@ -36,8 +36,8 @@ apache::dotconf { 'custom':
 
 apache::module { 'rewrite': }
 
-apache::vhost { 'sites.whatup':
-  server_name   => 'sites.whatup',
+apache::vhost { 'sites.dev':
+  server_name   => 'sites.dev',
   serveraliases => [
 ],
   docroot       => '/var/www/',
@@ -71,50 +71,6 @@ class { 'php::pear':
 
 
 
-$xhprofPath = '/var/www/xhprof'
-
-php::pecl::module { 'xhprof':
-  use_package     => false,
-  preferred_state => 'beta',
-}
-
-if !defined(Package['git-core']) {
-  package { 'git-core' : }
-}
-
-vcsrepo { $xhprofPath:
-  ensure   => present,
-  provider => git,
-  source   => 'https://github.com/facebook/xhprof.git',
-  require  => Package['git-core']
-}
-
-file { "${xhprofPath}/xhprof_html":
-  ensure  => 'directory',
-  owner   => 'vagrant',
-  group   => 'vagrant',
-  mode    => '0775',
-  require => Vcsrepo[$xhprofPath]
-}
-
-composer::run { 'xhprof-composer-run':
-  path    => $xhprofPath,
-  require => [
-    Class['composer'],
-    File["${xhprofPath}/xhprof_html"]
-  ]
-}
-
-apache::vhost { 'xhprof':
-  server_name => 'xhprof',
-  docroot     => "${xhprofPath}/xhprof_html",
-  port        => 80,
-  priority    => '1',
-  require     => [
-    Php::Pecl::Module['xhprof'],
-    File["${xhprofPath}/xhprof_html"]
-  ]
-}
 
 
 class { 'xdebug':
