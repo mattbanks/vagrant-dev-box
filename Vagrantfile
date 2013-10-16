@@ -9,12 +9,12 @@ Vagrant.configure("2") do |config|
     v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
     v.customize ["modifyvm", :id, "--memory", 1024]
     v.customize ["modifyvm", :id, "--name", "matts-dev-box"]
-    v.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/vagrant-root", "1"]
   end
 
 
   nfs_setting = RUBY_PLATFORM =~ /darwin/ || RUBY_PLATFORM =~ /linux/
-  config.vm.synced_folder "~/Sites", "/var/www", id: "vagrant-root", :nfs => true
+  config.vm.synced_folder "~/Sites", "/var/www", id: "webroot", :nfs => true
+  config.vm.synced_folder "~/Dropbox/Projects", "/Users/mattbanks/Dropbox/Projects", id: "projectsfolder", :nfs => true
   config.vm.provision :shell, :inline =>
     "if [[ ! -f /apt-get-run ]]; then sudo apt-get update && sudo touch /apt-get-run; fi"
 
