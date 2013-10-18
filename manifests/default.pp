@@ -36,8 +36,8 @@ apache::dotconf { 'custom':
 
 apache::module { 'rewrite': }
 
-apache::vhost { 'sites.dev':
-  server_name   => 'sites.dev',
+apache::vhost { 'sites.whatup':
+  server_name   => 'sites.whatup',
   serveraliases => [
 ],
   docroot       => '/var/www/',
