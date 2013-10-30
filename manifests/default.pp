@@ -120,19 +120,6 @@ class { 'mysql::server':
 }
 
 
-class { 'phpmyadmin':
-  require => [Class['mysql::server'], Class['mysql::config'], Class['php']],
-}
-
-apache::vhost { 'phpmyadmin':
-  server_name => 'phpmyadmin',
-  docroot     => '/usr/share/phpmyadmin',
-  port        => 80,
-  priority    => '10',
-  require     => Class['phpmyadmin'],
-}
-
-
 include nodejs
 
 package { [
@@ -145,6 +132,11 @@ package { [
 
 
 package { 'compass':
+    ensure   => 'installed',
+    provider => 'gem',
+}
+
+package { 'bourbon':
     ensure   => 'installed',
     provider => 'gem',
 }

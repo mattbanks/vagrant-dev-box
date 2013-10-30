@@ -6,14 +6,13 @@ Created with [PuPHPet](https://puphpet.com/) and tweaked to add extra features a
 
 * Apache
 * MySQL
-* PHP 5.4
-* PHPMyAdmin
+* PHP 5.4 (with APC)
 * XDebug
 * NodeJS
 * Grunt
 * Yeoman
 * Bower
-* Compass Ruby Gem
+* Compass & Bourbon Ruby Gems
 * WP-CLI (via [Ryan McCue's puppet-wp module](https://github.com/rmccue/puppet-wp))
 * Composer
 
