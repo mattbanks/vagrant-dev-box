@@ -13,18 +13,9 @@ Vagrant.configure("2") do |config|
 
 
   nfs_setting = RUBY_PLATFORM =~ /darwin/ || RUBY_PLATFORM =~ /linux/
-  config.vm.synced_folder "~/Sites", "/var/www", id: "webroot", :nfs => true
-  config.vm.synced_folder "~/Dropbox/Projects", "/Users/mattbanks/Dropbox/Projects", id: "projectsfolder", :nfs => true
-  config.vm.provision :shell, :inline =>
-    "if [[ ! -f /apt-get-run ]]; then sudo apt-get update && sudo touch /apt-get-run; fi"
+  config.vm.synced_folder "~/Sites", "/var/www", id: "webroot", :nfs => false
+  config.vm.synced_folder "~/Dropbox/Projects", "/Users/mattbanks/Dropbox/Projects", id: "projectsfolder", :nfs => false
 
+  config.vm.provision :shell, :path => "install.sh"
 
-  config.vm.provision :shell, :inline => 'echo -e "mysql_root_password=mattbanks14
-controluser_password=awesome" > /etc/phpmyadmin.facts;'
-
-  config.vm.provision :puppet do |puppet|
-    puppet.manifests_path = "manifests"
-    puppet.module_path = "modules"
-    puppet.options = ['--verbose']
-  end
 end
