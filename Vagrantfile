@@ -4,7 +4,6 @@ Vagrant.configure("2") do |config|
 
   config.vm.network "private_network", ip: "192.168.56.101"
 
-
   config.vm.synced_folder "~/Sites", "/var/www", id: "vagrant-root", :nfs => false
   config.vm.synced_folder "~/Dropbox/Projects", "/Users/mattbanks/Dropbox/Projects", id: "vagrant-root", :nfs => false
 
@@ -16,20 +15,7 @@ Vagrant.configure("2") do |config|
     virtualbox.customize ["setextradata", :id, "--VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
   end
 
-  config.vm.provision :shell, :path => "shell/initial-setup.sh"
-  config.vm.provision :shell, :path => "shell/update-puppet.sh"
-  config.vm.provision :shell, :path => "shell/librarian-puppet-vagrant.sh"
-  config.vm.provision :puppet do |puppet|
-    puppet.facter = {
-      "ssh_username" => "vagrant"
-    }
-
-    puppet.manifests_path = "puppet/manifests"
-    puppet.options = ["--verbose", "--hiera_config /vagrant/hiera.yaml", "--parser future"]
-  end
-
-
-
+  config.vm.provision :shell, :path => "install.sh"
 
   config.ssh.username = "vagrant"
 
