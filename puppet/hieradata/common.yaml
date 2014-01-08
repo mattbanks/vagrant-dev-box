@@ -1,13 +1,13 @@
 ---
 vagrantfile-local:
     vm:
-        box: ubuntu-precise12042-x64-vbox4210
-        box_url: 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210.box'
+        box: centos64-x64-vbox43-1383512148
+        box_url: 'http://box.puphpet.com/centos64-x64-vbox43.box'
         hostname: null
         network:
             private_network: 192.168.56.101
             forwarded_port:
-                kl853PbV5v92:
+                ZGEsk7PLXLdp:
                     host: ''
                     guest: ''
         provider:
@@ -26,12 +26,12 @@ vagrantfile-local:
                     - '--hiera_config /vagrant/hiera.yaml'
                     - '--parser future'
         synced_folder:
-            71ZdCbXH9tEg:
+            CefI1dtUuSQr:
                 id: vagrant-root
                 source: ~/Sites
                 target: /var/www
                 nfs: 'false'
-            adxbDeAQFwuY:
+            WPNOBVRV58fl:
                 id: vagrant-root
                 source: ~/Dropbox/Projects
                 target: /Users/mattbanks/Dropbox/Projects
@@ -51,8 +51,8 @@ vagrantfile-local:
         host: ':detect'
 server:
     packages:
-        - vim
-        - git-core
+        - vim-common
+        - git
         - curl
     dot_files:
         -
@@ -63,7 +63,7 @@ apache:
         - php
         - rewrite
     vhosts:
-        xSkU1dBkNc4I:
+        OH0f6tTKt3Wt:
             servername: sites.whatup
             serveraliases:
                 - www.sites.whatup
@@ -77,6 +77,8 @@ apache:
     group: www-data
     default_vhost: true
     mpm_module: prefork
+    mod_pagespeed: 0
+    mod_spdy: 0
 php:
     version: '54'
     composer: '1'
@@ -85,7 +87,6 @@ php:
             - cli
             - intl
             - mcrypt
-            - curl
             - gd
         pear: {  }
         pecl:
@@ -95,7 +96,11 @@ php:
         display_errors: On
         error_reporting: '-1'
         session.save_path: /var/lib/php/session
-    timezone: America/New_York
+    timezone: America/Chicago
+drush:
+    install: 0
+    settings:
+        drush.tag_branch: 6.x
 xdebug:
     install: 0
     settings:
@@ -108,5 +113,15 @@ xdebug:
 mysql:
     root_password: mattbanks14
     phpmyadmin: 0
+    adminer: 0
     databases: {  }
+beanstalkd:
+    install: 0
+    listenaddress: 0.0.0.0
+    listenport: '13000'
+    maxjobsize: '65535'
+    maxconnections: '1024'
+    binlogdir: /var/lib/beanstalkd/binlog
+    binlogfsync: null
+    binlogsize: '10485760'
 

@@ -56,7 +56,16 @@ case $::osfamily {
   'redhat': {
     class { 'yum': extrarepo => ['epel'] }
 
+    class { 'yum::repo::rpmforge': }
+    class { 'yum::repo::repoforgeextras': }
+
     Class['::yum'] -> Yum::Managed_yumrepo <| |> -> Package <| |>
+
+    package { 'git-latest':
+      name    => 'git',
+      ensure  => 'latest',
+      require => Class['yum::repo::repoforgeextras']
+    }
 
     exec { 'bash_git':
       cwd     => "/home/${::ssh_username}",
@@ -93,6 +102,8 @@ if $php_values == undef {
 
 case $::operatingsystem {
   'debian': {
+    include apt::backports
+
     add_dotdeb { 'packages.dotdeb.org': release => $lsbdistcodename }
 
     if is_hash($php_values) {
@@ -105,9 +116,19 @@ case $::operatingsystem {
         add_dotdeb { 'packages.dotdeb.org-php55': release => 'wheezy-php55' }
       }
     }
+
+    $server_lsbdistcodename = downcase($lsbdistcodename)
+
+    apt::force { 'git':
+      release => "${server_lsbdistcodename}-backports",
+      timeout => 60
+    }
   }
   'ubuntu': {
     apt::key { '4F4EA0AAE5267A6C': }
+    apt::key { '4CBEDD5A': }
+
+    apt::ppa { 'ppa:pdoes/ppa': require => Apt::Key['4CBEDD5A'] }
 
     if is_hash($php_values) {
       # Ubuntu Lucid 10.04, Precise 12.04, Quantal 12.10 and Raring 13.04 can do PHP 5.3 (default <= 12.10) and 5.4 (default <= 13.04)
@@ -210,6 +231,14 @@ if $::osfamily == 'debian' {
   }
 }
 
+if has_key($apache_values, 'mod_pagespeed') and $apache_values['mod_pagespeed'] == 1 {
+  class { 'puphpet::apache::modpagespeed': }
+}
+
+if has_key($apache_values, 'mod_spdy') and $apache_values['mod_spdy'] == 1 {
+  class { 'puphpet::apache::modspdy': }
+}
+
 create_resources(apache::vhost, $apache_values['vhosts'])
 
 define apache_mod {
@@ -255,6 +284,12 @@ if $php_fpm_ini == undef {
 if is_hash($apache_values) {
   include apache::params
 
+  if has_key($apache_values, 'mod_spdy') and $apache_values['mod_spdy'] == 1 {
+    $php_webserver_service_ini = 'cgi'
+  } else {
+    $php_webserver_service_ini = 'httpd'
+  }
+
   $php_webserver_service = 'httpd'
   $php_webserver_user    = $apache::params::user
   $php_webserver_restart = true
@@ -265,9 +300,10 @@ if is_hash($apache_values) {
 } elsif is_hash($nginx_values) {
   include nginx::params
 
-  $php_webserver_service = "${php_prefix}fpm"
-  $php_webserver_user    = $nginx::params::nx_daemon_user
-  $php_webserver_restart = true
+  $php_webserver_service     = "${php_prefix}fpm"
+  $php_webserver_service_ini = $php_webserver_service
+  $php_webserver_user        = $nginx::params::nx_daemon_user
+  $php_webserver_restart     = true
 
   class { 'php':
     package             => $php_webserver_service,
@@ -284,8 +320,9 @@ if is_hash($apache_values) {
     require    => Package[$php_webserver_service]
   }
 } else {
-  $php_webserver_service = undef
-  $php_webserver_restart = false
+  $php_webserver_service     = undef
+  $php_webserver_service_ini = undef
+  $php_webserver_restart     = false
 
   class { 'php':
     package             => "${php_prefix}cli",
@@ -307,11 +344,22 @@ if count($php_values['modules']['pecl']) > 0 {
 }
 if count($php_values['ini']) > 0 {
   each( $php_values['ini'] ) |$key, $value| {
-    puphpet::ini { $key:
-      entry       => "CUSTOM/${key}",
-      value       => $value,
-      php_version => $php_values['version'],
-      webserver   => $php_webserver_service
+    if is_array($value) {
+      each( $php_values['ini'][$key] ) |$innerkey, $innervalue| {
+        puphpet::ini { "${key}_${innerkey}":
+          entry       => "CUSTOM_${innerkey}/${key}",
+          value       => $innervalue,
+          php_version => $php_values['version'],
+          webserver   => $php_webserver_service_ini
+        }
+      }
+    } else {
+      puphpet::ini { $key:
+        entry       => "CUSTOM/${key}",
+        value       => $value,
+        php_version => $php_values['version'],
+        webserver   => $php_webserver_service_ini
+      }
     }
   }
 
@@ -333,7 +381,7 @@ puphpet::ini { $key:
   entry       => 'CUSTOM/date.timezone',
   value       => $php_values['timezone'],
   php_version => $php_values['version'],
-  webserver   => $php_webserver_service
+  webserver   => $php_webserver_service_ini
 }
 
 define php_mod {
@@ -366,6 +414,30 @@ if $php_values['composer'] == 1 {
     suhosin_enabled => false,
   }
 }
+
+## Begin Drush manifest
+
+if $drush_values == undef {
+  $drush_values = hiera('drush', false)
+}
+
+if $drush_values['install'] != undef and $drush_values['install'] == 1 {
+  if ($drush_values['settings']['drush.tag_branch'] != undef) {
+    $drush_tag_branch = $drush_values['settings']['drush.tag_branch']
+  } else {
+    $drush_tag_branch = ''
+  }
+
+  ## @see https://drupal.org/node/2165015
+  include drush::git::drush
+
+  ## class { 'drush::git::drush':
+  ##   git_branch => $drush_tag_branch,
+  ##   update     => true,
+  ## }
+}
+
+## End Drush manifest
 
 ## Begin Xdebug manifest
 
@@ -464,7 +536,7 @@ define mysql_db (
   }
 }
 
-if $mysql_values['phpmyadmin'] == 1 and is_hash($php_values) {
+if has_key($mysql_values, 'phpmyadmin') and $mysql_values['phpmyadmin'] == 1 and is_hash($php_values) {
   if $::osfamily == 'debian' {
     if $::operatingsystem == 'ubuntu' {
       apt::key { '80E7349A06ED541C': }
@@ -487,23 +559,44 @@ if $mysql_values['phpmyadmin'] == 1 and is_hash($php_values) {
   include puphpet::params
 
   if is_hash($apache_values) {
-    $mysql_webroot_location = $puphpet::params::apache_webroot_location
+    $mysql_pma_webroot_location = $puphpet::params::apache_webroot_location
   } elsif is_hash($nginx_values) {
-    $mysql_webroot_location = $puphpet::params::nginx_webroot_location
+    $mysql_pma_webroot_location = $puphpet::params::nginx_webroot_location
 
     mysql_nginx_default_conf { 'override_default_conf':
-      webroot => $mysql_webroot_location
+      webroot => $mysql_pma_webroot_location
     }
   }
 
-  file { "${mysql_webroot_location}/phpmyadmin":
-    target  => "/usr/share/${phpMyAdmin_folder}",
-    ensure  => link,
-    replace => 'no',
+  exec { 'move phpmyadmin to webroot':
+    command => "mv /usr/share/${phpMyAdmin_folder} ${mysql_pma_webroot_location}/phpmyadmin",
+    onlyif  => "test ! -d ${mysql_pma_webroot_location}/phpmyadmin",
     require => [
       Package[$phpMyAdmin_package],
-      File[$mysql_webroot_location]
+      File[$mysql_pma_webroot_location]
     ]
+  }
+
+  file { "/usr/share/${phpMyAdmin_folder}":
+    target  => "${mysql_pma_webroot_location}/phpmyadmin",
+    ensure  => link,
+    replace => 'no',
+    require => Exec['move phpmyadmin to webroot']
+  }
+}
+
+if has_key($mysql_values, 'adminer') and $mysql_values['adminer'] == 1 and is_hash($php_values) {
+  if is_hash($apache_values) {
+    $mysql_adminer_webroot_location = $puphpet::params::apache_webroot_location
+  } elsif is_hash($nginx_values) {
+    $mysql_adminer_webroot_location = $puphpet::params::nginx_webroot_location
+  } else {
+    $mysql_adminer_webroot_location = $puphpet::params::apache_webroot_location
+  }
+
+  class { 'puphpet::adminer':
+    location => "${mysql_adminer_webroot_location}/adminer",
+    owner    => 'www-data'
   }
 }
 
@@ -526,5 +619,15 @@ define mysql_nginx_default_conf (
     fastcgi_pass => $fastcgi_pass,
     notify       => Class['nginx::service'],
   }
+}
+
+# Begin beanstalkd
+
+if $beanstalkd_values == undef {
+  $beanstalkd_values = hiera('beanstalkd', false)
+}
+
+if has_key($beanstalkd_values, 'install') and $beanstalkd_values['install'] == 1 {
+  beanstalkd::config { $beanstalkd_values: }
 }
 
