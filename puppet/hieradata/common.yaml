@@ -7,7 +7,7 @@ vagrantfile-local:
         network:
             private_network: 192.168.56.101
             forwarded_port:
-                ZGEsk7PLXLdp:
+                xjzZQbgxbz87:
                     host: ''
                     guest: ''
         provider:
@@ -26,12 +26,12 @@ vagrantfile-local:
                     - '--hiera_config /vagrant/hiera.yaml'
                     - '--parser future'
         synced_folder:
-            CefI1dtUuSQr:
+            j29peF7BwH1p:
                 id: vagrant-root
                 source: ~/Sites
                 target: /var/www
                 nfs: 'false'
-            WPNOBVRV58fl:
+            L8VPMzd7Ii9L:
                 id: vagrant-root
                 source: ~/Dropbox/Projects
                 target: /Users/mattbanks/Dropbox/Projects
@@ -52,7 +52,6 @@ vagrantfile-local:
 server:
     packages:
         - vim-common
-        - git
         - curl
     dot_files:
         -
@@ -63,7 +62,7 @@ apache:
         - php
         - rewrite
     vhosts:
-        OH0f6tTKt3Wt:
+        5hhvbH1JbjyC:
             servername: sites.whatup
             serveraliases:
                 - www.sites.whatup
@@ -85,18 +84,18 @@ php:
     modules:
         php:
             - cli
+            - gd
             - intl
             - mcrypt
-            - gd
         pear: {  }
         pecl:
-            - pecl_http
             - APC
+            - pecl_http
     ini:
         display_errors: On
         error_reporting: '-1'
         session.save_path: /var/lib/php/session
-    timezone: America/Chicago
+    timezone: America/New_York
 drush:
     install: 0
     settings:
