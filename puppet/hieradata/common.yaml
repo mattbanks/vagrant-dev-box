@@ -13,7 +13,7 @@ vagrantfile-local:
         provider:
             virtualbox:
                 modifyvm:
-                    name: kcm-dev-box
+                    name: test-dev-box
                     natdnshostresolver1: on
                     memory: '1024'
                 setextradata:
