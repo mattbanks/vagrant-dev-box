@@ -1,19 +1,19 @@
 ---
 vagrantfile-local:
     vm:
-        box: centos64-x64-vbox43-1383512148
-        box_url: 'http://box.puphpet.com/centos64-x64-vbox43.box'
+        box: ubuntu-precise12042-x64-vbox4210
+        box_url: 'http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-12042-x64-vbox4210.box'
         hostname: null
         network:
             private_network: 192.168.56.101
             forwarded_port:
-                xjzZQbgxbz87:
+                MJSHYJEzyObj:
                     host: ''
                     guest: ''
         provider:
             virtualbox:
                 modifyvm:
-                    name: test-dev-box
+                    name: mb-dev-box
                     natdnshostresolver1: on
                     memory: '1024'
                 setextradata:
@@ -26,12 +26,12 @@ vagrantfile-local:
                     - '--hiera_config /vagrant/hiera.yaml'
                     - '--parser future'
         synced_folder:
-            j29peF7BwH1p:
+            JjKp21wEctdd:
                 id: vagrant-root
                 source: ~/Sites
                 target: /var/www
                 nfs: 'false'
-            L8VPMzd7Ii9L:
+            IogbUQRSNSPs:
                 id: vagrant-root
                 source: ~/Dropbox/Projects
                 target: /Users/mattbanks/Dropbox/Projects
@@ -50,9 +50,7 @@ vagrantfile-local:
     vagrant:
         host: ':detect'
 server:
-    packages:
-        - vim-common
-        - curl
+    packages: {  }
     dot_files:
         -
             bash_aliases: null
@@ -62,10 +60,10 @@ apache:
         - php
         - rewrite
     vhosts:
-        5hhvbH1JbjyC:
-            servername: sites.whatup
+        N8Sgadpywkb8:
+            servername: sites.dev
             serveraliases:
-                - www.sites.whatup
+                - www.sites.dev
             docroot: /var/www/
             port: '80'
             setenv:
@@ -84,22 +82,18 @@ php:
     modules:
         php:
             - cli
-            - gd
             - intl
             - mcrypt
+            - gd
         pear: {  }
         pecl:
-            - APC
             - pecl_http
+            - APC
     ini:
         display_errors: On
         error_reporting: '-1'
         session.save_path: /var/lib/php/session
     timezone: America/New_York
-drush:
-    install: 0
-    settings:
-        drush.tag_branch: 6.x
 xdebug:
     install: 0
     settings:
@@ -109,6 +103,10 @@ xdebug:
         xdebug.remote_enable: '1'
         xdebug.remote_handler: dbgp
         xdebug.remote_port: '9000'
+drush:
+    install: 0
+    settings:
+        drush.tag_branch: 6.x
 mysql:
     root_password: mattbanks14
     phpmyadmin: 0

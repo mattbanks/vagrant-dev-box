@@ -415,30 +415,6 @@ if $php_values['composer'] == 1 {
   }
 }
 
-## Begin Drush manifest
-
-if $drush_values == undef {
-  $drush_values = hiera('drush', false)
-}
-
-if $drush_values['install'] != undef and $drush_values['install'] == 1 {
-  if ($drush_values['settings']['drush.tag_branch'] != undef) {
-    $drush_tag_branch = $drush_values['settings']['drush.tag_branch']
-  } else {
-    $drush_tag_branch = ''
-  }
-
-  ## @see https://drupal.org/node/2165015
-  include drush::git::drush
-
-  ## class { 'drush::git::drush':
-  ##   git_branch => $drush_tag_branch,
-  ##   update     => true,
-  ## }
-}
-
-## End Drush manifest
-
 ## Begin Xdebug manifest
 
 if $xdebug_values == undef {
@@ -469,6 +445,30 @@ if $xdebug_values['install'] != undef and $xdebug_values['install'] == 1 {
     }
   }
 }
+
+## Begin Drush manifest
+
+if $drush_values == undef {
+  $drush_values = hiera('drush', false)
+}
+
+if $drush_values['install'] != undef and $drush_values['install'] == 1 {
+  if ($drush_values['settings']['drush.tag_branch'] != undef) {
+    $drush_tag_branch = $drush_values['settings']['drush.tag_branch']
+  } else {
+    $drush_tag_branch = ''
+  }
+
+  ## @see https://drupal.org/node/2165015
+  include drush::git::drush
+
+  ## class { 'drush::git::drush':
+  ##   git_branch => $drush_tag_branch,
+  ##   update     => true,
+  ## }
+}
+
+## End Drush manifest
 
 ## Begin MySQL manifest
 

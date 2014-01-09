@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
-  config.vm.box = "centos64-x64-vbox43-1383512148"
-  config.vm.box_url = "http://box.puphpet.com/centos64-x64-vbox43.box"
+  config.vm.box = "precise32"
+  config.vm.box_url = "http://files.vagrantup.com/precise32.box"
 
   config.vm.network "private_network", ip: "192.168.56.101"
 
@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.usable_port_range = (2200..2250)
   config.vm.provider :virtualbox do |virtualbox|
-    virtualbox.customize ["modifyvm", :id, "--name", "test-dev-box"]
+    virtualbox.customize ["modifyvm", :id, "--name", "mb-dev-box"]
     virtualbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
     virtualbox.customize ["modifyvm", :id, "--memory", "1024"]
     virtualbox.customize ["setextradata", :id, "--VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
