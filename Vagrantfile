@@ -19,7 +19,7 @@ Vagrant.configure("2") do |config|
     "if [[ ! -f /apt-get-run ]]; then sudo apt-get update && sudo touch /apt-get-run; fi"
 
 
-  config.vm.provision :shell, :inline => 'echo -e "mysql_root_password=mattbanks14
+  config.vm.provision :shell, :inline => 'echo -e "mysql_root_password=root
 controluser_password=awesome" > /etc/phpmyadmin.facts;'
 
   config.vm.provision :puppet do |puppet|

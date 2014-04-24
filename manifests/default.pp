@@ -116,7 +116,7 @@ puphpet::ini { 'custom':
 
 
 class { 'mysql::server':
-  config_hash   => { 'root_password' => 'mattbanks14' }
+  config_hash   => { 'root_password' => 'root' }
 }
 
 
